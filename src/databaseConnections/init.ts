@@ -2,6 +2,7 @@ import pool from './pool';
 import { createUsersTable } from './tables/users';
 import { createPostsTable } from './tables/posts';
 import { createEmailVerificationTokensTable } from './tables/email_verification_tokens';
+import { createPasswordResetTokensTable } from './tables/password_reset_token';
 import { createActivityLogsTable } from './tables/activity_logs';
 import { createDeletedUsersTable } from './tables/deleted_users';
 
@@ -13,6 +14,7 @@ export const initDatabase = async () => {
         await createUsersTable(connection);
         await createPostsTable(connection);
         await createEmailVerificationTokensTable(connection);
+        await createPasswordResetTokensTable(connection);
         await createActivityLogsTable(connection);
         await createDeletedUsersTable(connection);
     } finally {
