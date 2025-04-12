@@ -23,10 +23,23 @@ export const registerUser: RequestHandler = async (req, res) => {
             res.status(400).json({ message: 'User already exists' });
             return;
         }
+
+        // Convert the current time to IST (Indian Standard Time)
         const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+
+        // Insert user into the database
         await connection.query(
             'INSERT INTO users (uuid, username, email, password, pfp, registeredDate) VALUES (?, ?, ?, ?, ?, ?)',
             [uuid, username, email, hashedPassword, pfp || '', istTime]
+        );
+
+        const [userRow] = await connection.query('SELECT id FROM users WHERE email = ?', [email]);
+        const userId = (userRow as any[])[0].id;
+
+        // Insert action into activity_logs
+        await connection.query(
+            'INSERT INTO activity_logs (user_id, action, created_at) VALUES (?, ?, ?)',
+            [userId, 'registered', istTime]
         );
 
         await connection.commit();

@@ -5,7 +5,7 @@ export const createActivityLogsTable = async (connection: any) => {
       user_id INT NOT NULL,
       action ENUM('registered', 'heart_given', 'account_deleted') NOT NULL,
       post_id INT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      created_at TIMESTAMP NOT NULL,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
       FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE SET NULL
     )
