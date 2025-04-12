@@ -7,9 +7,9 @@ export const createUsersTable = async (connection: any) => {
         username VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL UNIQUE,
         password TEXT NOT NULL,
-        isVerified BOOLEAN DEFAULT false,
+        isVerified BOOLEAN DEFAULT true,
         isAdmin BOOLEAN DEFAULT false,
-        registeredDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        registeredDate TIMESTAMP NOT NULL
       )
     `);
     console.log('✅ Users table ready');
