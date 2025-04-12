@@ -4,6 +4,11 @@ import { createPostsTable } from './tables/posts';
 import { createActivityLogsTable } from './tables/activity_logs';
 import { createDeletedUsersTable } from './tables/deleted_users';
 
+//import { updateUser } from './queries/makeAdmin';
+
+/**
+ * @breif Initialize the database by creating necessary tables if not made.
+ */
 export const initDatabase = async () => {
     const connection = await pool.getConnection();
     try {
@@ -13,6 +18,8 @@ export const initDatabase = async () => {
         await createPostsTable(connection);
         await createActivityLogsTable(connection);
         await createDeletedUsersTable(connection);
+        
+        //await updateUser(connection,"itsmeprinceyt");
     } finally {
         connection.release();
     }

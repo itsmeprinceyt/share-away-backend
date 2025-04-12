@@ -4,10 +4,9 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import moment from 'moment-timezone';
 
-/* 
-    @brief  -  Controller for user registration and email verification.
-    @description -  This controller handles user registration and email verification. It includes functions to register a new user, send a verification email, and verify the user's email address.
-    @param  -  req: Express request object, res: Express response object
+/** 
+ *   @brief  -  Controller for user registration and email verification.
+ *   @description -  This controller handles user registration and email verification. It includes functions to register a new user, send a verification email, and verify the user's email address.
 */
 export const registerUser: RequestHandler = async (req, res) => {
     const { username, email, password, pfp } = req.body;
