@@ -1,16 +1,28 @@
+/**
+ * @breif Update activity logs using data of users_table.
+ * @description This query fetches all the user's data and then use that
+ * to log entries in the activity_logs. I created this because I forgot to 
+ * add activity_logs queries so 2 users were un-logged.
+*/
+
 export const insertAction = async (connection: any) => {
-    // Step 2: Fetch 2 existing users
-    const [users]: any[] = await connection.execute(`
-      SELECT id, username FROM users ORDER BY id ASC LIMIT 2
-    `);
+  // If you want to clear the existing activity logs before inserting new ones, uncomment the following line:
+  
+  //await connection.execute(`DELETE FROM activity_logs`);
+  //console.log('🗑️ Cleared all existing activity logs');
 
-    // Step 3: Insert 'registered' action for them into activity_logs
-    for (const user of users) {
-        await connection.execute(`
-        INSERT INTO activity_logs (user_id, action)
-        VALUES (?, 'registered');
-      `, [user.id]);
+  const [users]: any[] = await connection.execute(`
+    SELECT uuid, username FROM users ORDER BY id ASC
+  `);
 
-        console.log(`📝 Registered action logged for user '${user.username}'`);
-    }
-};
+  for (const user of users) {
+    await connection.execute(`
+        INSERT INTO activity_logs (uuid, action, created_at)
+        VALUES (?, 'registered', NOW());
+      `, [user.uuid]);
+
+    console.log(`📝 Registered action logged for user '${user.username}'`);
+  }
+}
+
+

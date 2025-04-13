@@ -1,3 +1,7 @@
+/**
+ * @brief Creates the users table if it doesn't exists.
+ */
+
 export const createUsersTable = async (connection: any) => {
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS users (

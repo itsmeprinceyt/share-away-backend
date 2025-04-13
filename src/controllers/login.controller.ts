@@ -2,8 +2,8 @@ import { RequestHandler } from 'express';
 import { getUserByEmail } from '../services/user.service';
 import bcrypt from 'bcrypt';
 /**
- * @breif Handles user login with verification check.
- * @description This function checks if the user exists using email and password
+ * @breif Controller for user login with email.
+ * @description This controller checks if the user exists using email and password
  * in the database and compares the hash values and then returns user data if its correct.
 */
 export const loginUser: RequestHandler = async (req, res) => {
@@ -26,7 +26,7 @@ export const loginUser: RequestHandler = async (req, res) => {
         }
 
         // If the password is valid, return all user details (except for password)
-        const { password: _, ...userDetails } = user; // Destructure and remove password
+        const { password: _, ...userDetails } = user;
         res.status(200).json(userDetails);
 
     } catch (err) {

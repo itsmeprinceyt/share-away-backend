@@ -1,3 +1,7 @@
+/**
+ * @brief Creates the deleted user table if it doesn't exists.
+ */
+
 export const createDeletedUsersTable = async (connection: any) => {
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS deleted_users (

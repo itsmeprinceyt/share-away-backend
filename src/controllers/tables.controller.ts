@@ -1,6 +1,12 @@
 import { Request, Response } from 'express';
 import pool from '../databaseConnections/pool';
 
+/**
+ * @breif A part of /admin panel where we can see all the tables.
+ * @description This controller returns all the tables in the database.
+ * We can also see the data in the tables using the getTableData controller.
+*/
+
 export const getTables = async (_req: Request, res: Response) => {
     const connection = await pool.getConnection();
     try {
@@ -21,6 +27,10 @@ export const getTables = async (_req: Request, res: Response) => {
         connection.release();
     }
 };
+
+/**
+ * @breif A part of /admin panel where we can see all data in a requested table.
+*/
 
 export const getTableData = async (req: Request, res: Response) => {
     const tableName = req.params.name;

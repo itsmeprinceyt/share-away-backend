@@ -1,6 +1,12 @@
 import { RequestHandler } from 'express';
 import pool from '../databaseConnections/pool';
 
+/**
+ * @breif A part of /profile where we can see any user profile through their uuid.
+ * @description The requested uuid is searched in the database and returns
+ * all the data they need. The password is not returned for security reasons.
+*/
+
 export const getUserByUUID: RequestHandler = async (req, res) => {
     const { uuid } = req.params;
 

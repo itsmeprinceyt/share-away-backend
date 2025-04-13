@@ -1,14 +1,11 @@
-import pool from '../databaseConnections/pool' // your MySQL connection
-import { RowDataPacket } from 'mysql2/promise';
+import pool from '../databaseConnections/pool'
+import { User } from '../types/User';
 
-interface User extends RowDataPacket {
-    id: number;
-    email: string;
-    password: string;
-    isVerified: boolean;
-    verificationCode: string;
-    verificationCodeExpiry: Date;
-}
+/**
+ * @brief To fetch user data from the database using their email.
+ * @description A user service helper function for login-reset.controller.ts to help
+ * login using email.
+*/
 
 export const getUserByEmail = async (email: string): Promise<User | undefined> => {
     const [rows] = await pool.query<User[]>(

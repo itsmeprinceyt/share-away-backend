@@ -1,3 +1,7 @@
+/**
+ * @brief Creates Posts table if it doesn't exists.
+ */
+
 export const createPostsTable = async (connection: any) => {
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS posts (
