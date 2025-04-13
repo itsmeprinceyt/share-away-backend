@@ -14,5 +14,5 @@ export const createActivityLogsTable = async (connection: any) => {
       FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE SET NULL
     )
   `);
-  console.log('✅ Activity Logs table ready');
+  console.log('✅ "Activity Logs" table ready ...');
 };

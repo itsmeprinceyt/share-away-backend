@@ -11,5 +11,5 @@ export const createDeletedUsersTable = async (connection: any) => {
         deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    console.log('✅ Deleted Users table ready');
+    console.log('✅ "Deleted Users" table ready ...');
   };

@@ -16,5 +16,5 @@ export const createUsersTable = async (connection: any) => {
         registeredDate TIMESTAMP NOT NULL
       )
     `);
-    console.log('✅ Users table ready');
+    console.log('✅ "Users" table ready ...');
 };
