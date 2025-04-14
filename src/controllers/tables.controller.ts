@@ -34,13 +34,12 @@ export const getTables = async (_req: Request, res: Response) => {
 
 export const getTableData = async (req: Request, res: Response) => {
     const tableName = req.params.name;
-
     try {
         const connection = await pool.getConnection();
         const [rows] = await connection.query(`SELECT * FROM ??`, [tableName]);
         connection.release();
         res.json({ data: rows });
-        console.error('✅ Tables fetched!: ', tableName);
+        console.log(`✅ Fetched data from table: ${tableName}`);
     } catch (err) {
         console.error('❌ Error fetching table data:', err);
         res.status(500).json({ message: 'Failed to fetch table data' });

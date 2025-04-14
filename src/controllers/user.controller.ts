@@ -1,12 +1,12 @@
 import { RequestHandler } from 'express';
 import pool from '../databaseConnections/pool';
+import moment from 'moment-timezone';
 
 /**
  * @breif A part of /profile where we can see any user profile through their uuid.
  * @description The requested uuid is searched in the database and returns
  * all the data they need. The password is not returned for security reasons.
 */
-
 export const getUserByUUID: RequestHandler = async (req, res) => {
     const { uuid } = req.params;
 
@@ -47,5 +47,89 @@ export const getUserByUUID: RequestHandler = async (req, res) => {
     } catch (error) {
         console.error('Error fetching user by UUID:', error);
         res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+/**
+ * * @breif A part of /profile where we can validate if the user still exists or not.
+ */
+export const checkUserByUUID: RequestHandler = async (req, res) => {
+    const { uuid } = req.params;
+    try {
+        const [user] = await pool.query('SELECT uuid FROM users WHERE uuid = ?', [uuid]);
+
+        if (!Array.isArray(user) || user.length === 0) {
+            res.status(404).json({ message: 'Account does not exist' });
+            return;
+        }
+
+        res.status(200).json({ exists: true });
+        return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+        return;
+    }
+};
+
+
+/**
+ *  @description        - Deletes a user by UUID: archives them, adjusts hearts,
+ * deletes their posts, and removes the user.
+ */
+export const deleteUserByUUID: RequestHandler = async (req, res) => {
+    const { uuid } = req.params;
+    const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    try {
+        const [userRows]: any = await connection.execute(
+            'SELECT username, email FROM users WHERE uuid = ?',
+            [uuid]
+        );
+
+        if (userRows.length === 0) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+        }
+
+        await connection.execute(
+            "INSERT INTO activity_logs (uuid, action, created_at) VALUES (?, ?, ?)",
+            [uuid, 'account_deleted', istTime]
+        );
+
+        const { username, email } = userRows[0];
+        await connection.execute(
+            'INSERT INTO deleted_users (username, email, deleted_at) VALUES (?, ?, ?)',
+            [username, email, istTime]
+        );
+
+        const [heartLogs]: any = await connection.execute(
+            "SELECT post_uuid FROM activity_logs WHERE uuid = ? AND action = 'heart_given'",
+            [uuid]
+        );
+        
+        for (const log of heartLogs) {
+            if (log.post_uuid) {
+                await connection.execute(
+                    'UPDATE posts SET heart_count = heart_count - 1 WHERE post_uuid = ? AND heart_count > 0',
+                    [log.post_uuid]
+                );
+            }
+        }
+
+        await connection.execute('DELETE FROM posts WHERE uuid = ?', [uuid]);
+        await connection.execute('DELETE FROM users WHERE uuid = ?', [uuid]);
+
+        await connection.commit();
+        res.status(200).json({ message: 'User account and related data deleted successfully.' });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error deleting user by UUID:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    } finally {
+        connection.release();
     }
 };

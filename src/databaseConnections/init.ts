@@ -13,7 +13,6 @@ import { createDeletedUsersTable } from './tables/deleted_users';
 /**
  * @breif Initialize the database by creating necessary tables if not made.
 */
-
 export const initDatabase = async () => {
     const connection = await pool.getConnection();
     try {

@@ -1,3 +1,4 @@
+import moment from 'moment-timezone';
 /**
  * @breif Update activity logs using data of users_table.
  * @description This query fetches all the user's data and then use that
@@ -16,12 +17,14 @@ export const insertAction = async (connection: any) => {
   `);
 
   for (const user of users) {
-    await connection.execute(`
-        INSERT INTO activity_logs (uuid, action, created_at)
-        VALUES (?, 'registered', NOW());
-      `, [user.uuid]);
+    const istTime = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
 
-    console.log(`📝 Registered action logged for user '${user.username}'`);
+    await connection.execute(`
+      INSERT INTO activity_logs (uuid, action, created_at)
+      VALUES (?, 'registered', ?)
+    `, [user.uuid, istTime]);
+
+    console.log(`📝 Registered action logged for user '${user.username}' at ${istTime}`);
   }
 }
 
