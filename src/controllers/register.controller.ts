@@ -25,6 +25,12 @@ export const registerUser: RequestHandler = async (req, res) => {
             return;
         }
 
+        const [existingUsername] = await connection.query('SELECT 1 FROM users WHERE username = ?', [username]);
+        if ((existingUsername as any[]).length > 0) {
+            res.status(400).json({ message: 'Username already taken' });
+            return;
+        }
+
         // Insert user into the database
         await connection.query(
             'INSERT INTO users (uuid, username, email, password, pfp, registeredDate) VALUES (?, ?, ?, ?, ?, ?)',
