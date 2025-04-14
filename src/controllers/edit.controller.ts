@@ -34,7 +34,6 @@ export const editPassword: RequestHandler = async (req, res) => {
 
         // Hash the new password
         const hashedPassword = await bcrypt.hash(confirmPassword, 10);
-        // Update the password in the database
         await connection.query('UPDATE users SET password = ? WHERE uuid = ?', [hashedPassword, uuid]);
 
         await connection.commit();

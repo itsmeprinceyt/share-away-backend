@@ -22,7 +22,7 @@ export const getUserByUUID: RequestHandler = async (req, res) => {
         delete user.password;
 
         const [countRows]: any = await pool.execute(
-            'SELECT COUNT(*) AS totalPosts FROM posts WHERE user_id = ?',
+            'SELECT COUNT(*) AS totalPosts FROM posts WHERE uuid = ?',
             [uuid]
         );
         const totalPosts = countRows[0].totalPosts || 0;
@@ -34,7 +34,7 @@ export const getUserByUUID: RequestHandler = async (req, res) => {
         const totalHearts = countHearts[0].totalHearts || 0;
 
         const [posts]: any = await pool.execute(
-            'SELECT * FROM posts WHERE user_id = ? ORDER BY posted_at DESC',
+            'SELECT * FROM posts WHERE uuid = ? ORDER BY posted_at DESC',
             [uuid]
         );
 
