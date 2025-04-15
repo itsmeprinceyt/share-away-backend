@@ -136,14 +136,14 @@ export const viewPost: RequestHandler = async (req, res) => {
  * post's owner with the request owner uuid and deletes the post if they are same.
  */
 export const deletePost: RequestHandler = async (req, res) => {
-    const { uuid, user_id } = req.body;
+    const { uuid } = req.body;
     const { post_uuid } = req.params;
     const connection = await pool.getConnection();
 
     try {
         await connection.beginTransaction();
 
-        if (!uuid || !user_id || !post_uuid) {
+        if (!uuid || !post_uuid) {
             res.status(400).json({ message: 'Missing required fields' });
             return;
         }
@@ -159,10 +159,10 @@ export const deletePost: RequestHandler = async (req, res) => {
         }
 
         const post = (rows as any[])[0];
-        const isOwner = post.uuid === uuid;
+        const isOwnerOrAdmin = post.uuid === uuid || req.body.isAdmin === 1;
 
-        if (!isOwner) {
-            res.status(403).json({ message: 'You are not the owner of this post' });
+        if (!isOwnerOrAdmin) {
+            res.status(403).json({ message: 'You are not allowed to delete this post' });
             return;
         }
 
