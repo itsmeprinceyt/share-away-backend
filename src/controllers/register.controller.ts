@@ -25,6 +25,16 @@ export const registerUser: RequestHandler = async (req, res) => {
             return;
         }
 
+        const [blacklisted] = await connection.query(
+            'SELECT * FROM blacklisted_users WHERE email = ?',
+            [email]
+        );
+        
+        if ((blacklisted as any[]).length > 0) {
+            res.status(400).json({ message: 'User is blacklisted' });
+            return;
+        }
+        
         const [existingUsername] = await connection.query('SELECT 1 FROM users WHERE username = ?', [username]);
         if ((existingUsername as any[]).length > 0) {
             res.status(400).json({ message: 'Username already taken' });

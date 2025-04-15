@@ -6,10 +6,9 @@ export const createActivityLogsTable = async (connection: any) => {
     CREATE TABLE IF NOT EXISTS activity_logs (
       log_id INT AUTO_INCREMENT PRIMARY KEY,
       uuid VARCHAR(16) NOT NULL,
-      action ENUM('registered', 'heart_given', 'account_deleted') NOT NULL,
+      action ENUM('registered', 'heart_given', 'account_deleted', 'user_banned') NOT NULL,
       post_uuid VARCHAR(16),
       created_at TIMESTAMP NOT NULL,
-      FOREIGN KEY (uuid) REFERENCES users(uuid) ON DELETE CASCADE,
       FOREIGN KEY (post_uuid) REFERENCES posts(post_uuid) ON DELETE SET NULL
     )
   `);

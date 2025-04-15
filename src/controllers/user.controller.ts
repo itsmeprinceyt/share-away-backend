@@ -133,3 +133,111 @@ export const deleteUserByUUID: RequestHandler = async (req, res) => {
         connection.release();
     }
 };
+
+/**
+ *  @description        - Bans a user: adds to blacklist, logs the action, deletes their account and content.
+ */
+export const banUser: RequestHandler = async (req, res) => {
+    const { uuid } = req.params;
+    const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    try {
+        const [userRows]: any = await connection.execute(
+            'SELECT username, email FROM users WHERE uuid = ?',
+            [uuid]
+        );
+
+        if (userRows.length === 0) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+        }
+
+        const { username, email } = userRows[0];
+
+        await connection.execute(
+            'INSERT INTO blacklisted_users (email, banned_at) VALUES (?, ?)',
+            [email, istTime]
+        );
+
+        await connection.execute(
+            'INSERT INTO activity_logs (uuid, action, created_at) VALUES (?, ?, ?)',
+            [uuid, 'user_banned', istTime]
+        );
+
+        await connection.execute(
+            "INSERT INTO activity_logs (uuid, action, created_at) VALUES (?, ?, ?)",
+            [uuid, 'account_deleted', istTime]
+        );
+
+        await connection.execute(
+            'INSERT INTO deleted_users (username, email, deleted_at) VALUES (?, ?, ?)',
+            [username, email, istTime]
+        );
+
+        const [heartLogs]: any = await connection.execute(
+            "SELECT post_uuid FROM activity_logs WHERE uuid = ? AND action = 'heart_given'",
+            [uuid]
+        );
+        
+        for (const log of heartLogs) {
+            if (log.post_uuid) {
+                await connection.execute(
+                    'UPDATE posts SET heart_count = heart_count - 1 WHERE post_uuid = ? AND heart_count > 0',
+                    [log.post_uuid]
+                );
+            }
+        }
+
+        await connection.execute('DELETE FROM posts WHERE uuid = ?', [uuid]);
+        await connection.execute('DELETE FROM users WHERE uuid = ?', [uuid]);
+
+        await connection.commit();
+        res.status(200).json({ message: 'User banned and data deleted successfully.' });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error banning user:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    } finally {
+        connection.release();
+    }
+};
+
+/**
+ * @description - Unbans a user by removing them from blacklist and logging the action.
+ */
+export const revokeBan: RequestHandler = async (req, res) => {
+    const { email } = req.params;
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    try {
+        const [userRows]: any = await connection.execute(
+            'SELECT email FROM blacklisted_users WHERE email = ?',
+            [email]
+        );
+
+        if (userRows.length === 0) {
+            res.status(404).json({ error: 'User is not blacklisted' });
+            return;
+        }
+
+        // Remove from blacklist
+        await connection.execute(
+            'DELETE FROM blacklisted_users WHERE email = ?',
+            [email]
+        );
+
+        await connection.commit();
+        res.status(200).json({ message: 'User unbanned successfully.' });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error unbanning user:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    } finally {
+        connection.release();
+    }
+};
