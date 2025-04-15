@@ -34,9 +34,57 @@ export const createPost: RequestHandler = async (req, res) => {
     }
 };
 
+/**
+ * @brief       - Controller to edit the post
+ */
 export const editPost: RequestHandler = async (req, res) => {
+    const { uuid, username, user_id, post_uuid, content } = req.body;
+    const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+    const connection = await pool.getConnection();
 
+    try {
+        await connection.beginTransaction();
+
+        if (!uuid || !username || !user_id || !post_uuid || !content) {
+            res.status(400).json({ message: 'Missing required fields' });
+            return;
+        }
+
+        // Check if post exists and belongs to the user
+        const [rows] = await connection.query(
+            `SELECT user_id FROM posts WHERE post_uuid = ?`,
+            [post_uuid]
+        );
+
+        if ((rows as any[]).length === 0) {
+            res.status(404).json({ message: 'Post not found' });
+            return;
+        }
+
+        const post = (rows as any[])[0];
+        const isOwner = post.user_id === user_id;
+
+        if (!isOwner) {
+            res.status(403).json({ message: 'You are not the owner of this post' });
+            return;
+        }
+
+        await connection.query(
+            `UPDATE posts SET content = ?, posted_at = ? WHERE post_uuid = ?`,
+            [JSON.stringify(content), istTime, post_uuid]
+        );
+
+        await connection.commit();
+        res.status(200).json({ message: '✅ Post updated successfully' });
+    } catch (err) {
+        await connection.rollback();
+        console.error('❌ Error editing post:', err);
+        res.status(500).json({ message: 'Failed to edit post', error: err });
+    } finally {
+        connection.release();
+    }
 };
+
 
 /**
  * @brief       - Controller to fetch a specific post by its post_uuid.
@@ -82,6 +130,54 @@ export const viewPost: RequestHandler = async (req, res) => {
     }
 };
 
+/**
+ * @brief       - Controller to delete the post by post_uuid
+ * @description - This controller retrieves the post using post_uuid and compares the
+ * post's owner with the request owner uuid and deletes the post if they are same.
+ */
 export const deletePost: RequestHandler = async (req, res) => {
+    const { uuid, user_id } = req.body;
+    const { post_uuid } = req.params;
+    const connection = await pool.getConnection();
 
+    try {
+        await connection.beginTransaction();
+
+        if (!uuid || !user_id || !post_uuid) {
+            res.status(400).json({ message: 'Missing required fields' });
+            return;
+        }
+
+        const [rows] = await connection.query(
+            `SELECT uuid FROM posts WHERE post_uuid = ?`,
+            [post_uuid]
+        );
+
+        if ((rows as any[]).length === 0) {
+            res.status(404).json({ message: 'Post not found' });
+            return;
+        }
+
+        const post = (rows as any[])[0];
+        const isOwner = post.uuid === uuid;
+
+        if (!isOwner) {
+            res.status(403).json({ message: 'You are not the owner of this post' });
+            return;
+        }
+
+        await connection.query(
+            `DELETE FROM posts WHERE post_uuid = ?`,
+            [post_uuid]
+        );
+
+        await connection.commit();
+        res.status(200).json({ message: '🗑️ Post deleted successfully' });
+    } catch (err) {
+        await connection.rollback();
+        console.error('❌ Error deleting post:', err);
+        res.status(500).json({ message: 'Failed to delete post', error: err });
+    } finally {
+        connection.release();
+    }
 };
