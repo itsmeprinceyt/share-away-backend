@@ -4,6 +4,7 @@ import authRoutes from './auth.routes';
 import userRoutes from './user.routes';
 import editRoutes from './edit.routes';
 import postRoutes from './post.routes';
+import heartRoutes from './heart.routes';
 
 const router = Router();
 
@@ -12,5 +13,6 @@ router.use('/auth', authRoutes);
 router.use('/user', userRoutes);
 router.use('/edit', editRoutes);
 router.use('/post', postRoutes);
+router.use('/heart', heartRoutes);
 
 export default router;

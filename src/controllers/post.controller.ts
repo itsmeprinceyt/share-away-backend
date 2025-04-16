@@ -91,6 +91,7 @@ export const editPost: RequestHandler = async (req, res) => {
  * @description - This controller retrieves a post along with basic user info using the post_uuid.
  */
 export const viewPost: RequestHandler = async (req, res) => {
+    const { uuid } = req.query;
     const { post_uuid } = req.params;
     const connection = await pool.getConnection();
 
@@ -102,14 +103,23 @@ export const viewPost: RequestHandler = async (req, res) => {
 
         const [rows] = await connection.query(
             `SELECT post_uuid, uuid, username, user_id, heart_count, content, posted_at 
-             FROM posts 
-             WHERE post_uuid = ?`,
+            FROM posts 
+            WHERE post_uuid = ?`,
             [post_uuid]
         );
 
         if ((rows as any[]).length === 0) {
             res.status(404).json({ message: 'Post not found' });
             return;
+        }
+
+        let hearted = false;
+        if (req.query.uuid) {
+            const [heartRows] = await connection.query(
+                `SELECT * FROM hearts WHERE user_uuid = ? AND post_uuid = ?`,
+                [req.query.uuid, post_uuid]
+            );
+            hearted = (heartRows as any[]).length > 0;
         }
 
         const post = (rows as any[])[0];
@@ -119,7 +129,8 @@ export const viewPost: RequestHandler = async (req, res) => {
             message: '✅ Post fetched successfully',
             post: {
                 ...post,
-                content: parsedContent
+                content: parsedContent,
+                hearted
             }
         });
     } catch (err) {
@@ -177,76 +188,6 @@ export const deletePost: RequestHandler = async (req, res) => {
         await connection.rollback();
         console.error('❌ Error deleting post:', err);
         res.status(500).json({ message: 'Failed to delete post', error: err });
-    } finally {
-        connection.release();
-    }
-};
-
-/**
- * @brief       - Controller to handle when someone clicks on heart.
- */
-export const toggleHeart: RequestHandler = async (req, res) => {
-    const { uuid } = req.body;
-    const { post_uuid } = req.params;
-    const connection = await pool.getConnection();
-
-    try {
-        await connection.beginTransaction();
-
-        if (!uuid || !post_uuid) {
-            res.status(400).json({ message: 'Missing required fields' });
-            return;
-        }
-
-        // Check if post exists
-        const [posts] = await connection.query(
-            `SELECT heart_count FROM posts WHERE post_uuid = ?`,
-            [post_uuid]
-        );
-
-        if ((posts as any[]).length === 0) {
-            res.status(404).json({ message: 'Post not found' });
-            return;
-        }
-
-        const [logs] = await connection.query(
-            `SELECT * FROM activity_logs WHERE uuid = ? AND post_uuid = ? AND action = 'heart_given'`,
-            [uuid, post_uuid]
-        );
-
-        // Running this if block if heart already given
-        if ((logs as any[]).length > 0) {
-            await connection.query(
-                `DELETE FROM activity_logs WHERE uuid = ? AND post_uuid = ? AND action = 'heart_given'`,
-                [uuid, post_uuid]
-            );
-            await connection.query(
-                `UPDATE posts SET heart_count = heart_count - 1 WHERE post_uuid = ? AND heart_count > 0`,
-                [post_uuid]
-            );
-
-            await connection.commit();
-            res.status(200).json({ message: '💔 Heart removed', status: 'removed' });
-            return
-        }
-
-        // Continuing if no heart was given to that post by that uuid
-        await connection.query(
-            `INSERT INTO activity_logs (uuid, action, post_uuid) VALUES (?, ?, ?)`,
-            [uuid, 'heart_given', post_uuid]
-        );
-        await connection.query(
-            `UPDATE posts SET heart_count = heart_count + 1 WHERE post_uuid = ?`,
-            [post_uuid]
-        );
-
-        await connection.commit();
-        res.status(200).json({ message: '❤️ Heart added', status: 'added' });
-        return;
-    } catch (err) {
-        await connection.rollback();
-        console.error('❌ Error toggling heart:', err);
-        res.status(500).json({ message: 'Failed to toggle heart', error: err });
     } finally {
         connection.release();
     }

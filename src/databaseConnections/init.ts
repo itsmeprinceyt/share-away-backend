@@ -2,6 +2,7 @@ import pool from './pool';
 /* TABLES QUERIES */
 import { createUsersTable } from './tables/users';
 import { createPostsTable } from './tables/posts';
+import { createHeartsTable } from './tables/hearts_table';
 import { createActivityLogsTable } from './tables/activity_logs';
 import { createDeletedUsersTable } from './tables/deleted_users';
 import { createBlacklistedUsersTable } from './tables/blacklisted_users';
@@ -21,6 +22,7 @@ export const initDatabase = async () => {
 
         await createUsersTable(connection);
         await createPostsTable(connection);
+        await createHeartsTable(connection);
         await createActivityLogsTable(connection);
         await createDeletedUsersTable(connection);
         await createBlacklistedUsersTable(connection);
