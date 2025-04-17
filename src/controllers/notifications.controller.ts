@@ -5,7 +5,8 @@ import pool from '../databaseConnections/pool';
  * @brief       - Get notification if someone likes your post.
  */
 export const getHeartNotifications: RequestHandler = async (req, res) => {
-    const { uuid } = req.query;
+    const { uuid, offset = 0, limit = 5 } = req.query;
+
     try {
         const [rows]: any = await pool.query(
             `
@@ -17,8 +18,9 @@ export const getHeartNotifications: RequestHandler = async (req, res) => {
             JOIN users u ON h.user_uuid = u.uuid
             WHERE p.uuid = ? AND h.user_uuid != ?
             ORDER BY h.created_at DESC
+            LIMIT ? OFFSET ?
             `,
-            [uuid, uuid]
+            [uuid, uuid, Number(limit), Number(offset)]
         );
 
         res.json({ notifications: rows });
