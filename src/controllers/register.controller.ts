@@ -54,11 +54,11 @@ export const registerUser: RequestHandler = async (req, res) => {
         );
 
         await connection.commit();
-        res.status(201).json({ message: 'User registered' });
+        res.status(201).json({ message: "You're in our good books now!" });
     } catch (err) {
         await connection.rollback();
         console.error('❌ Registration error:', err);
-        res.status(500).json({ message: 'Registration failed', error: err });
+        res.status(500).json({ message: 'Sign up failed', error: err });
     } finally {
         connection.release();
     }
