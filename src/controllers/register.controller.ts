@@ -11,6 +11,21 @@ import moment from 'moment-timezone';
 */
 export const registerUser: RequestHandler = async (req, res) => {
     const { username, email, password, pfp } = req.body;
+    const allowedDomains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com', 'icloud.com'];
+    const emailDomain = email.split('@')[1];
+
+    if (!allowedDomains.includes(emailDomain)) {
+        res.status(400).json({ message: 'Only Gmail, Hotmail, Yahoo, Outlook, and iCloud emails are allowed.' });
+        return
+    }
+
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,15}$/;
+    if (!passwordRegex.test(password)) {
+        res.status(400).json({
+            message: 'Password must be 8–15 characters long, include 1 uppercase letter, 1 number, and 1 special character.',
+        });
+        return
+    }
     const uuid = crypto.randomUUID().slice(0, 16);
     const hashedPassword = await bcrypt.hash(password, 10);
     const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
@@ -29,12 +44,12 @@ export const registerUser: RequestHandler = async (req, res) => {
             'SELECT * FROM blacklisted_users WHERE email = ?',
             [email]
         );
-        
+
         if ((blacklisted as any[]).length > 0) {
-            res.status(400).json({ message: 'User is blacklisted' });
+            res.status(400).json({ message: 'You are blacklisted' });
             return;
         }
-        
+
         const [existingUsername] = await connection.query('SELECT 1 FROM users WHERE username = ?', [username]);
         if ((existingUsername as any[]).length > 0) {
             res.status(400).json({ message: 'Username already taken' });

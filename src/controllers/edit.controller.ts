@@ -8,11 +8,19 @@ import moment from 'moment-timezone';
  * @description             - This controller checks the user's current password, compares it with the stored password,
  *                            hashes the new password, and updates it in the database.
  * 
- * @param {currentPassword} - Current Password.
- * @param {confirmPassword} - New Password.
+ * @param currentPassword - Current Password.
+ * @param confirmPassword - New Password.
  */
 export const editPassword: RequestHandler = async (req, res) => {
     const { uuid, currentPassword, confirmPassword } = req.body;
+
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,15}$/;
+    if (!passwordRegex.test(confirmPassword)) {
+        res.status(400).json({
+            message: 'Password must be 8–15 characters long, include 1 uppercase letter, 1 number, and 1 special character.',
+        });
+        return;
+    }
 
     const connection = await pool.getConnection();
     try {
