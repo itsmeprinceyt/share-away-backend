@@ -19,7 +19,7 @@ export const initDatabase = async () => {
     const connection = await pool.getConnection();
     try {
         console.log('✅ MySQL connected via pool');
-
+        
         await createUsersTable(connection);
         await createPostsTable(connection);
         await createHeartsTable(connection);
