@@ -6,15 +6,26 @@ import pool from '../databaseConnections/pool';
  * @description This controller returns all the tables in the database.
  * We can also see the data in the tables using the getTableData controller.
 */
+const getDatabaseName = (): string => {
+    switch (process.env.ENV) {
+        case 'prod':
+            return process.env.PROD_DB_NAME as string;
+        case 'dev':
+        default:
+            return process.env.DEV_DB_NAME as string;
+    }
+};
 
 export const getTables = async (_req: Request, res: Response) => {
     const connection = await pool.getConnection();
     try {
+        const dbName = getDatabaseName();
+
         const [rows] = await connection.query(
             `SELECT table_name 
              FROM information_schema.tables 
              WHERE table_schema = ?`,
-            [process.env.DB_NAME]
+            [dbName]
         );
 
         const tableNames = (rows as { table_name: string }[]).map(row => row.table_name);
