@@ -6,15 +6,36 @@ dotenv.config();
  * @brief Intiates the connection to the database.
  */
 
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 5,
-});
+let dbConfig;
 
+switch (process.env.ENV) {
+    case 'prod':
+        dbConfig = {
+            host: process.env.PROD_DB_HOST,
+            port: Number(process.env.PROD_DB_PORT),
+            user: process.env.PROD_DB_USER,
+            password: process.env.PROD_DB_PASSWORD,
+            database: process.env.PROD_DB_NAME,
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 5,
+        };
+        break;
+
+    case 'dev':
+    default:
+        dbConfig = {
+            host: process.env.DEV_DB_HOST,
+            port: Number(process.env.DEV_DB_PORT),
+            user: process.env.DEV_DB_USER,
+            password: process.env.DEV_DB_PASSWORD,
+            database: process.env.DEV_DB_NAME,
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 5,
+        };
+        break;
+}
+
+const pool = mysql.createPool(dbConfig);
 export default pool;

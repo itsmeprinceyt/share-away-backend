@@ -14,6 +14,25 @@ export const registerUser: RequestHandler = async (req, res) => {
     const allowedDomains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com', 'icloud.com'];
     const emailDomain = email.split('@')[1];
 
+    const bannedWords = ['fuck', 'sex', 'porn', 'ass', 'dick', 'boob', 'pussy', 'bitch'];
+    const lowercaseUsername = username.toLowerCase();
+
+    if (username.length > 15) {
+        res.status(400).json({ message: 'Username must be less than 15 characters.' });
+        return;
+    }
+    
+    if (bannedWords.some(word => lowercaseUsername.includes(word))) {
+        res.status(400).json({ message: 'Username contains inappropriate content.' });
+        return;
+    }
+
+    const usernameRegex = /^[a-zA-Z0-9_]+$/;
+    if (!usernameRegex.test(username)) {
+        res.status(400).json({ message: 'Username can only contain letters, numbers, and underscores.' });
+        return;
+    }
+
     if (!allowedDomains.includes(emailDomain)) {
         res.status(400).json({ message: 'Only Gmail, Hotmail, Yahoo, Outlook, and iCloud emails are allowed.' });
         return
