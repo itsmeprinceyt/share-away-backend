@@ -192,3 +192,41 @@ export const deletePost: RequestHandler = async (req, res) => {
         connection.release();
     }
 };
+
+/**
+ * @route GET /posts
+ * @desc Fetches all posts from all users, latest first, includes hasHearted status for the viewer
+ */
+
+export const getAllPosts: RequestHandler = async (req, res) => {
+    const { viewer_uuid } = req.query;
+
+    try {
+        const [rows]: any = await pool.query(
+            `
+            SELECT 
+                p.post_uuid,
+                p.uuid AS user_uuid,
+                u.username,
+                u.pfp,
+                p.content,
+                p.heart_count,
+                p.posted_at,
+                CASE 
+                    WHEN h.user_uuid IS NOT NULL THEN TRUE 
+                    ELSE FALSE 
+                END AS hasHearted
+            FROM posts p
+            JOIN users u ON p.uuid = u.uuid
+            LEFT JOIN hearts h 
+                ON p.post_uuid = h.post_uuid AND h.user_uuid = ?
+            ORDER BY p.posted_at DESC
+            `,
+            [viewer_uuid]
+        );
+        res.status(200).json({ posts: rows });
+    } catch (error) {
+        console.error('Error fetching all posts:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};

@@ -22,7 +22,10 @@ export const addHeart: RequestHandler = async (req, res) => {
         );
 
         await connection.query(
-            `UPDATE posts SET heart_count = heart_count + 1 WHERE post_uuid = ?`,
+            `UPDATE posts 
+             SET heart_count = heart_count + 1, 
+                 posted_at = posted_at
+             WHERE post_uuid = ?`,
             [post_uuid]
         );
 
@@ -69,7 +72,10 @@ export const removeHeart: RequestHandler = async (req, res) => {
         }
 
         await connection.query(
-            `UPDATE posts SET heart_count = GREATEST(heart_count - 1, 0) WHERE post_uuid = ?`,
+            `UPDATE posts 
+             SET heart_count = GREATEST(heart_count - 1, 0), 
+                 posted_at = posted_at
+             WHERE post_uuid = ?`,
             [post_uuid]
         );
 
