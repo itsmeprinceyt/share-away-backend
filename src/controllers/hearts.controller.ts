@@ -1,11 +1,13 @@
 import { RequestHandler } from 'express';
 import pool from '../databaseConnections/pool';
+import moment from 'moment-timezone';
 
 /**
  * @brief       - Controller to add heart to the post.
  */
 export const addHeart: RequestHandler = async (req, res) => {
     const { uuid, post_uuid } = req.body;
+    const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
     const connection = await pool.getConnection();
 
     try {
@@ -18,6 +20,12 @@ export const addHeart: RequestHandler = async (req, res) => {
 
         await connection.query(
             `INSERT INTO hearts (user_uuid, post_uuid) VALUES (?, ?)`,
+            [uuid, post_uuid]
+        );
+
+        await connection.query(
+            `INSERT INTO activity_logs (uuid, action, post_uuid, created_at) 
+             VALUES (?, 'heart_given', ?, NOW())`,
             [uuid, post_uuid]
         );
 
@@ -50,6 +58,7 @@ export const addHeart: RequestHandler = async (req, res) => {
  */
 export const removeHeart: RequestHandler = async (req, res) => {
     const { uuid, post_uuid } = req.query;
+    const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
     const connection = await pool.getConnection();
 
     try {
@@ -77,6 +86,11 @@ export const removeHeart: RequestHandler = async (req, res) => {
                  posted_at = posted_at
              WHERE post_uuid = ?`,
             [post_uuid]
+        );
+
+        await connection.query(
+            `DELETE FROM activity_logs WHERE uuid = ? AND post_uuid = ? AND action = 'heart_given'`,
+            [uuid, post_uuid]
         );
 
         await connection.commit();

@@ -91,8 +91,8 @@ export const editPost: RequestHandler = async (req, res) => {
  * @description - This controller retrieves a post along with basic user info using the post_uuid.
  */
 export const viewPost: RequestHandler = async (req, res) => {
-    const { uuid } = req.query;
     const { post_uuid } = req.params;
+    const { uuid: viewer_uuid } = req.query;
     const connection = await pool.getConnection();
 
     try {
@@ -102,9 +102,10 @@ export const viewPost: RequestHandler = async (req, res) => {
         }
 
         const [rows] = await connection.query(
-            `SELECT post_uuid, uuid, username, user_id, heart_count, content, posted_at 
-            FROM posts 
-            WHERE post_uuid = ?`,
+            `SELECT p.post_uuid, p.uuid, p.username, p.user_id, p.heart_count, p.content, p.posted_at, u.pfp
+            FROM posts p
+            LEFT JOIN users u ON p.uuid = u.uuid
+            WHERE p.post_uuid = ?`,
             [post_uuid]
         );
 
@@ -114,10 +115,10 @@ export const viewPost: RequestHandler = async (req, res) => {
         }
 
         let hearted = false;
-        if (req.query.uuid) {
+        if (viewer_uuid) {
             const [heartRows] = await connection.query(
                 `SELECT * FROM hearts WHERE user_uuid = ? AND post_uuid = ?`,
-                [req.query.uuid, post_uuid]
+                [viewer_uuid, post_uuid]
             );
             hearted = (heartRows as any[]).length > 0;
         }
@@ -130,7 +131,8 @@ export const viewPost: RequestHandler = async (req, res) => {
             post: {
                 ...post,
                 content: parsedContent,
-                hearted
+                hasHearted: hearted,
+                pfp: post.pfp
             }
         });
     } catch (err) {
