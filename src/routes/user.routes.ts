@@ -1,8 +1,9 @@
 import express from 'express';
-import { getUserByUUID, deleteUserByUUID, checkUserByUUID, banUser, revokeBan, banUserEmail } from '../controllers/user.controller';
+import { getUserByUUID, deleteUserByUUID, checkUserByUUID, banUser, revokeBan, banUserEmail, searchUsers } from '../controllers/user.controller';
 
 const router = express.Router();
 
+router.get('/search-users', searchUsers);
 router.get('/check/:uuid', checkUserByUUID);
 router.delete('/delete/:uuid', deleteUserByUUID);
 router.delete('/ban/:uuid', banUser);

@@ -330,3 +330,50 @@ export const banUserEmail: RequestHandler = async (req, res) => {
         connection.release();
     }
 };
+
+export const searchUsers: RequestHandler = async (req, res) => {
+    const { method, query } = req.query;
+
+    if (!method || !query) {
+        res.status(400).json({ error: 'Missing method or query' });
+        return
+    }
+
+    const searchColumn = method === 'email' ? 'email' : 'username';
+    const regex = `(?i)${query.toString()}`;
+
+    try {
+        const connection = await pool.getConnection();
+        const [rows] = await connection.query(
+            `
+            SELECT 
+              u.id,
+              u.uuid,
+              u.username,
+              u.pfp,
+              u.registeredDate,
+              COALESCE(p.totalPosts, 0) AS totalPosts,
+              COALESCE(h.totalHearts, 0) AS totalHearts
+            FROM users u
+            LEFT JOIN (
+              SELECT uuid, COUNT(*) AS totalPosts
+              FROM posts
+              GROUP BY uuid
+            ) p ON u.uuid = p.uuid
+            LEFT JOIN (
+              SELECT uuid, SUM(heart_count) AS totalHearts
+              FROM posts
+              GROUP BY uuid
+            ) h ON u.uuid = h.uuid
+            WHERE u.${searchColumn} REGEXP ?
+            `,
+            [regex]
+          );
+        connection.release();
+        res.json(rows);
+    } catch (error) {
+        console.error('Error in searchUsers:', error);
+        res.status(500).json({ error: 'Internal server error' });
+        return;
+    }
+};
