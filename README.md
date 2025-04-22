@@ -79,7 +79,8 @@ Then you setup it in `https://github.com/itsmeprinceyt/share-away-backend/blob/m
 **NOTE:** You need to first create database and then put them in the `DB_NAME` and then just run the script, it'll create the tables itself.
 ```env
 ENV=dev # dev | prod
-PORT=
+PROD_PORT=
+DEV_PORT=
 JWT_TOKEN=
 
 PROD_DB_HOST=
