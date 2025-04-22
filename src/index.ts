@@ -4,7 +4,12 @@ import { initDatabase } from './databaseConnections/init';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const PORT = process.env.PORT;
+const ENV = process.env.ENV;
+const PORT =
+    ENV === 'prod'
+        ? process.env.PROD_PORT
+        : process.env.DEV_PORT;
+
 const startServer = async () => {
     try {
         await initDatabase();
