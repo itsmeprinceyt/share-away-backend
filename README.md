@@ -17,7 +17,7 @@
 
 ## Features
 
-- **User Authentication**: Secure user sign-up and login.
+- **User Authentication**: Secure user sign-up and login and using JWT Token to ensure security at its max!
 - **User Profiles**: Each user has a unique profile with personal information, posts, and interactions.
 - **Post Creation**: Users can create new posts to express their thoughts and feelings.
 - **Post Editing & Deletion**: Edit or delete your posts at any time.
@@ -80,6 +80,7 @@ Then you setup it in `https://github.com/itsmeprinceyt/share-away-backend/blob/m
 ```env
 ENV=dev # dev | prod
 PORT=
+JWT_TOKEN=
 
 PROD_DB_HOST=
 PROD_DB_PORT=

@@ -1,13 +1,14 @@
 import { RequestHandler } from 'express';
 import pool from '../databaseConnections/pool';
-import moment from 'moment-timezone';
+import { logger } from '../utils/logger';
 
 /**
  * @brief       - Controller to add heart to the post.
  */
 export const addHeart: RequestHandler = async (req, res) => {
     const { uuid, post_uuid } = req.body;
-    const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+    logger("ACTION", "Added heart", { uuid, post_uuid });
+
     const connection = await pool.getConnection();
 
     try {
@@ -58,7 +59,7 @@ export const addHeart: RequestHandler = async (req, res) => {
  */
 export const removeHeart: RequestHandler = async (req, res) => {
     const { uuid, post_uuid } = req.query;
-    const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+    logger("ACTION", "Removed heart", { uuid, post_uuid });
     const connection = await pool.getConnection();
 
     try {

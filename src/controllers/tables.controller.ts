@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import pool from '../databaseConnections/pool';
+import { logger } from '../utils/logger';
 
 /**
  * @breif A part of /admin panel where we can see all the tables.
@@ -30,7 +31,7 @@ export const getTables = async (_req: Request, res: Response) => {
 
         const tableNames = (rows as { table_name: string }[]).map(row => row.table_name);
         res.json({ tables: tableNames });
-        console.error('✅ Tables fetched!: ', tableNames);
+        logger("ADMIN", "Fetched all tables", { tableNames});
     } catch (err) {
         console.error('❌ Error fetching tables:', err);
         res.status(500).json({ message: 'Failed to fetch table names' });
@@ -50,7 +51,7 @@ export const getTableData = async (req: Request, res: Response) => {
         const [rows] = await connection.query(`SELECT * FROM ??`, [tableName]);
         connection.release();
         res.json({ data: rows });
-        console.log(`✅ Fetched data from table: ${tableName}`);
+        logger("ADMIN", "Fetched table data", { tableName});
     } catch (err) {
         console.error('❌ Error fetching table data:', err);
         res.status(500).json({ message: 'Failed to fetch table data' });

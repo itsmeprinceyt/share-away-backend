@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import pool from '../databaseConnections/pool';
 import moment from 'moment-timezone';
+import { logger } from '../utils/logger';
 
 /**
  * @brief       - Controller to create a new post.
@@ -8,6 +9,7 @@ import moment from 'moment-timezone';
  */
 export const createPost: RequestHandler = async (req, res) => {
     const { uuid, username, user_id, post_uuid, content } = req.body;
+    logger("ACTION", "Post created", { uuid, username, user_id, post_uuid });
     const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
     const connection = await pool.getConnection();
     try {
@@ -39,6 +41,7 @@ export const createPost: RequestHandler = async (req, res) => {
  */
 export const editPost: RequestHandler = async (req, res) => {
     const { uuid, username, user_id, post_uuid, content } = req.body;
+    logger("ACTION", "Post edited", { uuid, username, user_id, post_uuid });
     const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
     const connection = await pool.getConnection();
 
@@ -93,6 +96,7 @@ export const editPost: RequestHandler = async (req, res) => {
 export const viewPost: RequestHandler = async (req, res) => {
     const { post_uuid } = req.params;
     const { uuid: viewer_uuid } = req.query;
+    logger("ACTION", "Post viewed", { post_uuid, viewer_uuid });
     const connection = await pool.getConnection();
 
     try {
@@ -151,6 +155,7 @@ export const viewPost: RequestHandler = async (req, res) => {
 export const deletePost: RequestHandler = async (req, res) => {
     const { uuid } = req.body;
     const { post_uuid } = req.params;
+    logger("ACTION", "Post deleted", { uuid, post_uuid });
     const connection = await pool.getConnection();
 
     try {
@@ -202,6 +207,7 @@ export const deletePost: RequestHandler = async (req, res) => {
 
 export const getAllPosts: RequestHandler = async (req, res) => {
     const { viewer_uuid } = req.query;
+    logger("ACTION", "All Post Fetched for [HOME]", { viewer_uuid });
 
     try {
         const [rows]: any = await pool.query(

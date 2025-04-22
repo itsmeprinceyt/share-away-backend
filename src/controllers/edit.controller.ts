@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import bcrypt from 'bcrypt';
 import pool from '../databaseConnections/pool';
-import moment from 'moment-timezone';
+import { logger } from '../utils/logger';
 
 /**
  * @brief                   - Controller to update the user's password.
@@ -13,6 +13,7 @@ import moment from 'moment-timezone';
  */
 export const editPassword: RequestHandler = async (req, res) => {
     const { uuid, currentPassword, confirmPassword } = req.body;
+    logger("ACTION", "Edit password", { uuid });
 
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,15}$/;
     if (!passwordRegex.test(confirmPassword)) {
@@ -61,6 +62,7 @@ export const editPassword: RequestHandler = async (req, res) => {
  */
 export const editPfp: RequestHandler = async (req, res) => {
     const { uuid, pfp } = req.body;
+    logger("ACTION", "Edit profile picture", { uuid });
 
     const connection = await pool.getConnection();
     try {

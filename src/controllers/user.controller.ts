@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import pool from '../databaseConnections/pool';
 import moment from 'moment-timezone';
+import { logger } from '../utils/logger';
 
 /**
  * @breif A part of /profile where we can see any user profile through their uuid.
@@ -10,7 +11,7 @@ import moment from 'moment-timezone';
 export const getUserByUUID: RequestHandler = async (req, res) => {
     const { uuid } = req.params;
     const { viewer_uuid } = req.query;
-
+    logger("ACTION", "Fetching user by UUID", { uuid, viewer_uuid });
     try {
         const [rows]: any = await pool.execute('SELECT * FROM users WHERE uuid = ?', [uuid]);
 
@@ -67,6 +68,7 @@ export const getUserByUUID: RequestHandler = async (req, res) => {
  */
 export const checkUserByUUID: RequestHandler = async (req, res) => {
     const { uuid } = req.params;
+    logger("ACTION", "Checking user by UUID", { uuid });
     try {
         const [user] = await pool.query('SELECT uuid FROM users WHERE uuid = ?', [uuid]);
 
@@ -91,6 +93,7 @@ export const checkUserByUUID: RequestHandler = async (req, res) => {
  */
 export const deleteUserByUUID: RequestHandler = async (req, res) => {
     const { uuid } = req.params;
+    logger("ACTION", "Deleting user by UUID", { uuid });
     const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
     const connection = await pool.getConnection();
     await connection.beginTransaction();
@@ -151,6 +154,7 @@ export const deleteUserByUUID: RequestHandler = async (req, res) => {
  */
 export const banUser: RequestHandler = async (req, res) => {
     const { uuid } = req.params;
+    logger("ADMIN", "Banning user by UUID", { uuid });
     const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
     const connection = await pool.getConnection();
     await connection.beginTransaction();
@@ -222,6 +226,7 @@ export const banUser: RequestHandler = async (req, res) => {
  */
 export const revokeBan: RequestHandler = async (req, res) => {
     const { email } = req.params;
+    logger("ADMIN", "Unbanning user by Email", { email });
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
@@ -259,7 +264,7 @@ export const revokeBan: RequestHandler = async (req, res) => {
  */
 export const banUserEmail: RequestHandler = async (req, res) => {
     const { email } = req.params;
-
+    logger("ADMIN", "Banning user by Email", { email });
     if (!email) {
         res.status(400).json({ error: 'Email is required' });
         return
@@ -333,7 +338,7 @@ export const banUserEmail: RequestHandler = async (req, res) => {
 
 export const searchUsers: RequestHandler = async (req, res) => {
     const { method, query } = req.query;
-
+    logger("ACTION", "Searching user", { method, query });
     if (!method || !query) {
         res.status(400).json({ error: 'Missing method or query' });
         return

@@ -1,12 +1,13 @@
 import { RequestHandler } from 'express';
 import pool from '../databaseConnections/pool';
+import { logger } from '../utils/logger';
 
 /**
  * @brief       - Get notification if someone likes your post.
  */
 export const getHeartNotifications: RequestHandler = async (req, res) => {
     const { uuid, offset = 0, limit = 5 } = req.query;
-
+    logger("ACTION", "Notifications Fetched", { uuid, offset, limit });
     try {
         const [rows]: any = await pool.query(
             `

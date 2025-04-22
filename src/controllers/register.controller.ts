@@ -3,6 +3,7 @@ import pool from '../databaseConnections/pool';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import moment from 'moment-timezone';
+import { logger } from '../utils/logger';
 
 /** 
  *   @brief  -  Controller for user registration.
@@ -11,6 +12,8 @@ import moment from 'moment-timezone';
 */
 export const registerUser: RequestHandler = async (req, res) => {
     const { username, email, password, pfp } = req.body;
+    logger("SIGN-UP", "User Signed up", { username, email });
+    
     const allowedDomains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com', 'icloud.com'];
     const emailDomain = email.split('@')[1];
 
