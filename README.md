@@ -17,7 +17,7 @@
 
 ## Features
 
-- **User Authentication**: Secure user sign-up and login using JWT (JSON Web Tokens).
+- **User Authentication**: Secure user sign-up and login.
 - **Email Verification**: Users receive a verification email upon sign-up, ensuring secure registration.
 - **User Profiles**: Each user has a unique profile with personal information, posts, and interactions.
 - **Post Creation**: Users can create new posts to express their thoughts and feelings.
