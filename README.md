@@ -18,11 +18,10 @@
 ## Features
 
 - **User Authentication**: Secure user sign-up and login.
-- **Email Verification**: Users receive a verification email upon sign-up, ensuring secure registration.
 - **User Profiles**: Each user has a unique profile with personal information, posts, and interactions.
 - **Post Creation**: Users can create new posts to express their thoughts and feelings.
 - **Post Editing & Deletion**: Edit or delete your posts at any time.
-- **Like System (Hearts)**: Users can like or "heart" posts to express support.
+- **Like System (Hearts)**: Users can "heart" posts to express support.
 - **Search Functionality**: Search for users by username or email using regex-based search.
 - **Responsive UI**: The platform is optimized for both mobile and desktop views.
 - **Post Feed**: View the latest posts from all users in a centralized feed.
