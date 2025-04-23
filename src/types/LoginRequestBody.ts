@@ -1,4 +1,4 @@
 export default interface LoginRequestBody {
-    email: string;
+    loginCredential: string;
     password: string;
 }

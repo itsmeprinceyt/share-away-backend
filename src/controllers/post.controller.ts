@@ -2,12 +2,17 @@ import { RequestHandler } from 'express';
 import pool from '../databaseConnections/pool';
 import moment from 'moment-timezone';
 import { logger } from '../utils/logger';
+import { LOCKDOWN } from '../lockdown';
 
 /**
  * @brief       - Controller to create a new post.
  * @description - This controller inserts a new post into the database with user's info and post content.
  */
 export const createPost: RequestHandler = async (req, res) => {
+    if (LOCKDOWN) {
+        res.status(404).json({ message: 'Lockdown is activated. Posting is currently disabled.'});
+        return;
+    }
     const { uuid, username, user_id, post_uuid, content } = req.body;
     logger("ACTION", "Post created", { uuid, username, user_id, post_uuid });
     const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
