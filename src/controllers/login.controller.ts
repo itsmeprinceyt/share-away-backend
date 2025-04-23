@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { getUserByEmail } from '../services/user.service';
+import { getUserByEmail, getUserByUsername } from '../services/user.service';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import LoginRequestBody from '../types/LoginRequestBody';
@@ -11,11 +11,14 @@ import { logger } from '../utils/logger';
  * in the database and compares the hash values and then returns user data if its correct.
 */
 export const loginUser: RequestHandler<{}, {}, LoginRequestBody> = async (req, res) => {
-    const { email, password } = req.body;
-    logger("LOGIN", "User logged in", { email });
+    const { loginCredential, password } = req.body;
+    logger("LOGIN", "User logged in", { loginCredential });
 
     try {
-        const user = await getUserByEmail(email);
+        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginCredential);
+        const user = isEmail
+            ? await getUserByEmail(loginCredential)
+            : await getUserByUsername(loginCredential);
 
         if (!user) {
             res.status(404).json({ message: 'User not found' });

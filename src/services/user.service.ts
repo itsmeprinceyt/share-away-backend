@@ -14,3 +14,11 @@ export const getUserByEmail = async (email: string): Promise<User | undefined> =
     );
     return rows[0];
 };
+
+export const getUserByUsername = async (username: string): Promise<User | undefined> => {
+    const [rows] = await pool.query<User[]>(
+        'SELECT * FROM users WHERE username = ?',
+        [username]
+    );
+    return rows[0];
+};

@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import moment from 'moment-timezone';
 import { logger } from '../utils/logger';
+import { LOCKDOWN } from '../lockdown';
 
 /** 
  *   @brief  -  Controller for user registration.
@@ -11,6 +12,10 @@ import { logger } from '../utils/logger';
  *   registery in the activity_logs.
 */
 export const registerUser: RequestHandler = async (req, res) => {
+    if (LOCKDOWN) {
+        res.status(404).json({ message: 'Lockdown is activated. New registration is currently disabled.' });
+        return;
+    }
     const { username, email, password, pfp } = req.body;
     logger("SIGN-UP", "User Signed up", { username, email });
 
@@ -41,13 +46,30 @@ export const registerUser: RequestHandler = async (req, res) => {
         return
     }
 
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,15}$/;
-    if (!passwordRegex.test(password)) {
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{5,16}$/;
+
+    const passwordRequirements = [
+        { regex: /[A-Z]/, message: 'Password must contain at least 1 uppercase letter.' },
+        { regex: /\d/, message: 'Password must contain at least 1 number.' },
+        { regex: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, message: 'Password must contain at least 1 special character.' },
+        { regex: /^.{5,16}$/, message: 'Password must be between 5–16 characters long.' }
+    ];
+
+    const errors: string[] = [];
+
+    passwordRequirements.forEach((requirement) => {
+        if (!requirement.regex.test(password)) {
+            errors.push(requirement.message);
+        }
+    });
+
+    if (errors.length > 0) {
         res.status(400).json({
-            message: 'Password must be 8–15 characters long, include 1 uppercase letter, 1 number, and 1 special character.',
+            message: errors.join(' '),
         });
-        return
+        return;
     }
+    
     const uuid = crypto.randomUUID().slice(0, 16);
     const hashedPassword = await bcrypt.hash(password, 10);
     const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
