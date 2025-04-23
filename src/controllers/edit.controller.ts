@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 import bcrypt from 'bcrypt';
 import pool from '../databaseConnections/pool';
 import { logger } from '../utils/logger';
+import jwt from 'jsonwebtoken';
 
 /**
  * @brief                   - Controller to update the user's password.
@@ -14,15 +15,6 @@ import { logger } from '../utils/logger';
 export const editPassword: RequestHandler = async (req, res) => {
     const { uuid, currentPassword, confirmPassword } = req.body;
     logger("ACTION", "Edit password", { uuid });
-
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,15}$/;
-    if (!passwordRegex.test(confirmPassword)) {
-        res.status(400).json({
-            message: 'Password must be 8–15 characters long, include 1 uppercase letter, 1 number, and 1 special character.',
-        });
-        return;
-    }
-
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
@@ -34,11 +26,40 @@ export const editPassword: RequestHandler = async (req, res) => {
         }
         const userData = (user as any[])[0];
 
-        // Compare the current password with the stored hashed password
-        const isMatch = await bcrypt.compare(currentPassword, userData.password);
-        if (!isMatch) {
-            res.status(400).json({ message: 'Current password is incorrect' });
-            return
+        const SECRET_KEY = process.env.JWT_TOKEN;
+        const token = req.headers['authorization']?.split(' ')[1];
+        const decoded: any = jwt.verify(token!, SECRET_KEY!);
+
+        if (decoded.isAdmin !== 1) {
+            // Compare the current password with the stored hashed password only if its the owner, if its the admin then ignore this
+            const isMatch = await bcrypt.compare(currentPassword, userData.password);
+            if (!isMatch) {
+                res.status(400).json({ message: 'Current password is incorrect' });
+                return
+            }
+        }
+
+        // When the current password is correct, then regex check the new password
+        const passwordRequirements = [
+            { regex: /[A-Z]/, message: 'Password must contain at least 1 uppercase letter.' },
+            { regex: /\d/, message: 'Password must contain at least 1 number.' },
+            { regex: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, message: 'Password must contain at least 1 special character.' },
+            { regex: /^.{5,16}$/, message: 'Password must be between 5–16 characters long.' }
+        ];
+
+        const errors: string[] = [];
+
+        passwordRequirements.forEach((requirement) => {
+            if (!requirement.regex.test(confirmPassword)) {
+                errors.push(requirement.message);
+            }
+        });
+
+        if (errors.length > 0) {
+            res.status(400).json({
+                message: errors.join(' '),
+            });
+            return;
         }
 
         // Hash the new password
