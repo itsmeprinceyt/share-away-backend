@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import pool from '../databaseConnections/pool';
-import moment from 'moment-timezone';
+import getTimeIST from '../utils/getTimeIST';
 import { logger } from '../utils/logger';
 import { LOCKDOWN } from '../lockdown';
 
@@ -15,7 +15,7 @@ export const createPost: RequestHandler = async (req, res) => {
     }
     const { uuid, username, user_id, post_uuid, content } = req.body;
     logger("ACTION", "Post created", { uuid, username, user_id, post_uuid });
-    const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+    const istTime = getTimeIST();
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
@@ -47,7 +47,7 @@ export const createPost: RequestHandler = async (req, res) => {
 export const editPost: RequestHandler = async (req, res) => {
     const { uuid, username, user_id, post_uuid, content } = req.body;
     logger("ACTION", "Post edited", { uuid, username, user_id, post_uuid });
-    const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+    const istTime = getTimeIST();
     const connection = await pool.getConnection();
 
     try {

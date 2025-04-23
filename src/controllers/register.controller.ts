@@ -2,7 +2,7 @@ import { RequestHandler } from 'express';
 import pool from '../databaseConnections/pool';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import moment from 'moment-timezone';
+import getTimeIST from '../utils/getTimeIST';
 import { logger } from '../utils/logger';
 import { LOCKDOWN } from '../lockdown';
 
@@ -70,7 +70,7 @@ export const registerUser: RequestHandler = async (req, res) => {
     
     const uuid = crypto.randomUUID().slice(0, 16);
     const hashedPassword = await bcrypt.hash(password, 10);
-    const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+    const istTime = getTimeIST();
 
     const connection = await pool.getConnection();
     try {

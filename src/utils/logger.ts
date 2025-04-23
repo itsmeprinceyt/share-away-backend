@@ -1,12 +1,12 @@
 import chalk from 'chalk';
-import moment from 'moment-timezone';
+import getTimeIST from './getTimeIST';
 
 export const logger = (
     type: string,
     message: string,
     params: Record<string, any> = {}
 ) => {
-    const istTime = moment.tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+    const istTime = getTimeIST();
 
     const timeColor = chalk.cyan(`[${istTime}]`);
     const typeColor = chalk.yellow.bold(`[${type.toUpperCase().padEnd(7)}]`);

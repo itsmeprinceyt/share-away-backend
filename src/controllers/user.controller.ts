@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import pool from '../databaseConnections/pool';
-import moment from 'moment-timezone';
+import getTimeIST from '../utils/getTimeIST';
 import { logger } from '../utils/logger';
 
 /**
@@ -94,7 +94,7 @@ export const checkUserByUUID: RequestHandler = async (req, res) => {
 export const deleteUserByUUID: RequestHandler = async (req, res) => {
     const { uuid } = req.params;
     logger("ACTION", "Deleting user by UUID", { uuid });
-    const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+    const istTime = getTimeIST();
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
@@ -155,7 +155,7 @@ export const deleteUserByUUID: RequestHandler = async (req, res) => {
 export const banUser: RequestHandler = async (req, res) => {
     const { uuid } = req.params;
     logger("ADMIN", "Banning user by UUID", { uuid });
-    const istTime = moment.tz("Europe/Paris").tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+    const istTime = getTimeIST();
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
@@ -270,7 +270,7 @@ export const banUserEmail: RequestHandler = async (req, res) => {
         return
     }
 
-    const istTime = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+    const istTime = getTimeIST();
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
