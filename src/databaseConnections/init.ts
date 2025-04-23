@@ -12,7 +12,7 @@ import { createBlacklistedUsersTable } from './tables/blacklisted_users';
 //import { insertAction } from './queries/insertActions';
 //import { unbanUser } from './queries/unban';
 //import { verifyUnverifiedUsers } from './queries/verifyEveryone';
-
+//import { resetPasswordToDefault } from './queries/reset-pass';
 
 /**
  * @breif Initialize the database by creating necessary tables if not made.
@@ -33,6 +33,7 @@ export const initDatabase = async () => {
         //await updateUser(connection,"itsmeprinceyt","add");
         //await unbanUser(connection, "mohammadbadshah92@gmail.com");
         //await verifyUnverifiedUsers(connection);
+        //await resetPasswordToDefault(connection,"itsmeprinceyt");
     } finally {
         connection.release();
     }

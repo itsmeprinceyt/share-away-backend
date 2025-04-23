@@ -2,6 +2,9 @@ import { RequestHandler } from 'express';
 import pool from '../databaseConnections/pool';
 import getTimeIST from '../utils/getTimeIST';
 import { logger } from '../utils/logger';
+import jwt from 'jsonwebtoken';
+import { getUserByUsername } from '../services/user.service';
+import bcrypt from 'bcrypt';
 
 /**
  * @breif A part of /profile where we can see any user profile through their uuid.
@@ -373,12 +376,65 @@ export const searchUsers: RequestHandler = async (req, res) => {
             WHERE u.${searchColumn} REGEXP ?
             `,
             [regex]
-          );
+        );
         connection.release();
         res.json(rows);
     } catch (error) {
         console.error('Error in searchUsers:', error);
         res.status(500).json({ error: 'Internal server error' });
         return;
+    }
+};
+
+/**
+ * @brief This resets the entered user's password to 12345
+ */
+export const resetPassword: RequestHandler = async (req, res) => {
+    const SECRET_KEY = process.env.JWT_TOKEN;
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) {
+        res.status(401).json({ error: 'Authorization token is missing' });
+        return;
+    }
+
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    try {
+        const decoded: any = jwt.verify(token, SECRET_KEY!);
+
+        if (decoded.isAdmin !== 1) {
+            res.status(403).json({ error: 'You do not have permission to perform this action' });
+            return;
+        }
+
+        const { username } = req.body;
+        logger("ADMIN", "Resetting password", { username });
+        if (!username) {
+            res.status(400).json({ error: 'Username is required' });
+            return
+        }
+
+        const user = await getUserByUsername(username);
+        if (!user) {
+            res.status(404).json({ error: `User with username '${username}' not found.` });
+            return
+        }
+
+        const hashedPassword = await bcrypt.hash('12345', 10);
+        const [result] = await pool.execute(
+            `UPDATE users SET password = ? WHERE username = ?;`,
+            [hashedPassword, username]
+        );
+
+        await connection.commit();
+        res.status(200).json({ message: `Default password has been set for '${username}'` });
+        return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Something went wrong while resetting password' });
+        return;
+    } finally {
+        connection.release();
     }
 };
