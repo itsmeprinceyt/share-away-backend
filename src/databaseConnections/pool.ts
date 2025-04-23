@@ -17,8 +17,8 @@ switch (process.env.ENV) {
             password: process.env.PROD_DB_PASSWORD,
             database: process.env.PROD_DB_NAME,
             waitForConnections: true,
-            connectionLimit: 5,
-            queueLimit: 5,
+            connectionLimit: 20,
+            queueLimit: 10,
         };
         break;
 
@@ -31,8 +31,8 @@ switch (process.env.ENV) {
             password: process.env.DEV_DB_PASSWORD,
             database: process.env.DEV_DB_NAME,
             waitForConnections: true,
-            connectionLimit: 5,
-            queueLimit: 5,
+            connectionLimit: 20,
+            queueLimit: 10,
         };
         break;
 }
