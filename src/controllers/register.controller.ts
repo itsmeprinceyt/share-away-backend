@@ -13,7 +13,7 @@ import { logger } from '../utils/logger';
 export const registerUser: RequestHandler = async (req, res) => {
     const { username, email, password, pfp } = req.body;
     logger("SIGN-UP", "User Signed up", { username, email });
-    
+
     const allowedDomains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com', 'icloud.com'];
     const emailDomain = email.split('@')[1];
 
@@ -24,7 +24,7 @@ export const registerUser: RequestHandler = async (req, res) => {
         res.status(400).json({ message: 'Username must be less than 15 characters.' });
         return;
     }
-    
+
     if (bannedWords.some(word => lowercaseUsername.includes(word))) {
         res.status(400).json({ message: 'Username contains inappropriate content.' });
         return;
@@ -80,8 +80,8 @@ export const registerUser: RequestHandler = async (req, res) => {
 
         // Insert user into the database
         await connection.query(
-            'INSERT INTO users (uuid, username, email, password, pfp, registeredDate) VALUES (?, ?, ?, ?, ?, ?)',
-            [uuid, username, email, hashedPassword, pfp || '', istTime]
+            'INSERT INTO users (uuid, username, email, password, pfp, registeredDate, isVerified) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [uuid, username, email, hashedPassword, pfp || '', istTime, 1]
         );
 
         // Insert action into activity_logs

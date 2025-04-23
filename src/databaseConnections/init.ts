@@ -11,6 +11,7 @@ import { createBlacklistedUsersTable } from './tables/blacklisted_users';
 //import { updateUser } from './queries/makeAdmin';
 //import { insertAction } from './queries/insertActions';
 //import { unbanUser } from './queries/unban';
+//import { verifyUnverifiedUsers } from './queries/verifyEveryone';
 
 
 /**
@@ -31,6 +32,7 @@ export const initDatabase = async () => {
         //await insertAction(connection);
         //await updateUser(connection,"itsmeprinceyt","add");
         //await unbanUser(connection, "mohammadbadshah92@gmail.com");
+        //await verifyUnverifiedUsers(connection);
     } finally {
         connection.release();
     }
