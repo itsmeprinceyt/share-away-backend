@@ -46,8 +46,6 @@ export const registerUser: RequestHandler = async (req, res) => {
         return
     }
 
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{5,16}$/;
-
     const passwordRequirements = [
         { regex: /[A-Z]/, message: 'Password must contain at least 1 uppercase letter.' },
         { regex: /\d/, message: 'Password must contain at least 1 number.' },
