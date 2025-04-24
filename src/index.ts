@@ -25,7 +25,7 @@ const startServer = async () => {
             console.log(`- Architecture: ${systemInfo.arch}`);
             console.log(`- Hostname: ${systemInfo.hostname}`);
             console.log('------------------------');
-            console.log(`🚀 Backend running at [Hold Ctrl & click]: http://localhost:${PORT}`);
+            console.log(`🚀 Live: http://localhost:${PORT}`);
             console.log('------------------------');
         });
     } catch (err) {
