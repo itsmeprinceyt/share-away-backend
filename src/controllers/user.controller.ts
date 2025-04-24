@@ -341,19 +341,21 @@ export const banUserEmail: RequestHandler = async (req, res) => {
 
 export const searchUsers: RequestHandler = async (req, res) => {
     const { method, query } = req.query;
-    logger("ACTION", "Searching user", { method, query });
+    logger("ACTION", "Searching", { method, query });
+
     if (!method || !query) {
         res.status(400).json({ error: 'Missing method or query' });
-        return
+        return;
     }
 
-    const searchColumn = method === 'email' ? 'email' : 'username';
-    const regex = `(?i)${query.toString()}`;
+    const regex = query.toString().trim();
 
     try {
         const connection = await pool.getConnection();
-        const [rows] = await connection.query(
-            `
+
+        if (method === 'username') {
+            const [rows] = await connection.query(
+                `
             SELECT 
               u.id,
               u.uuid,
@@ -373,12 +375,69 @@ export const searchUsers: RequestHandler = async (req, res) => {
               FROM posts
               GROUP BY uuid
             ) h ON u.uuid = h.uuid
-            WHERE u.${searchColumn} REGEXP ?
+            WHERE u.username REGEXP ?
             `,
-            [regex]
-        );
+                [regex]
+            );
+            connection.release();
+            res.json(rows);
+            return;
+
+        } else if (method === 'email') {
+            const [rows] = await connection.query(
+                `
+            SELECT 
+              u.id,
+              u.uuid,
+              u.username,
+              u.pfp,
+              u.registeredDate,
+              COALESCE(p.totalPosts, 0) AS totalPosts,
+              COALESCE(h.totalHearts, 0) AS totalHearts
+            FROM users u
+            LEFT JOIN (
+              SELECT uuid, COUNT(*) AS totalPosts
+              FROM posts
+              GROUP BY uuid
+            ) p ON u.uuid = p.uuid
+            LEFT JOIN (
+              SELECT uuid, SUM(heart_count) AS totalHearts
+              FROM posts
+              GROUP BY uuid
+            ) h ON u.uuid = h.uuid
+            WHERE u.email = ?
+            `,
+                [regex]
+            );
+            connection.release();
+            res.json(rows);
+            return;
+        } else if (method === 'posts') {
+            const [rows] = await connection.query(
+                `
+                SELECT 
+                  p.post_uuid,
+                  p.uuid,
+                  u.username,
+                  u.pfp,
+                  p.content,
+                  p.posted_at,
+                  p.heart_count
+                FROM posts p
+                INNER JOIN users u ON p.uuid = u.uuid
+                WHERE p.content REGEXP ?
+                ORDER BY p.posted_at DESC
+                `,
+                [regex]
+            );
+            connection.release();
+            res.json(rows);
+            return;
+        }
+
         connection.release();
-        res.json(rows);
+        res.status(400).json({ error: 'Invalid search method' });
+        return;
     } catch (error) {
         console.error('Error in searchUsers:', error);
         res.status(500).json({ error: 'Internal server error' });
