@@ -131,7 +131,7 @@ export const deleteUserByUUID: RequestHandler = async (req, res) => {
         for (const log of heartLogs) {
             if (log.post_uuid) {
                 await connection.execute(
-                    'UPDATE posts SET heart_count = heart_count - 1 WHERE post_uuid = ? AND heart_count > 0',
+                    'UPDATE posts SET heart_count = GREATEST(heart_count - 1, 0), posted_at = posted_at WHERE post_uuid = ? AND heart_count > 0',
                     [log.post_uuid]
                 );
             }
@@ -203,7 +203,7 @@ export const banUser: RequestHandler = async (req, res) => {
         for (const log of heartLogs) {
             if (log.post_uuid) {
                 await connection.execute(
-                    'UPDATE posts SET heart_count = heart_count - 1 WHERE post_uuid = ? AND heart_count > 0',
+                    'UPDATE posts SET heart_count = GREATEST(heart_count - 1, 0), posted_at = posted_at WHERE post_uuid = ? AND heart_count > 0',
                     [log.post_uuid]
                 );
             }
@@ -318,7 +318,7 @@ export const banUserEmail: RequestHandler = async (req, res) => {
         for (const log of heartLogs) {
             if (log.post_uuid) {
                 await connection.execute(
-                    'UPDATE posts SET heart_count = heart_count - 1 WHERE post_uuid = ? AND heart_count > 0',
+                    'UPDATE posts SET heart_count = GREATEST(heart_count - 1, 0), posted_at = posted_at WHERE post_uuid = ? AND heart_count > 0',
                     [log.post_uuid]
                 );
             }
