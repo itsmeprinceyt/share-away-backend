@@ -20,7 +20,6 @@
     "expressjs": "^1.0.1",
     "form-data": "^4.0.2",
     "jsonwebtoken": "^9.0.2",
-    "mailgun.js": "^12.0.1",
     "moment-timezone": "^0.5.48",
     "mysql2": "^3.14.0",
     "nodemailer": "^6.10.0"
