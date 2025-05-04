@@ -121,7 +121,7 @@ Running from production build
 npm run start
 ```
 
-### Step 7: Start the Backend
+### Step 7: Start the Frontend
 For Development
 ```bash
 npm run dev
