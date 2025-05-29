@@ -149,3 +149,7 @@ This version of the `README.md` provides **all possible details** about the **Sh
 ### Video Explaination
 
 https://youtu.be/pBkdJ5-bF-U
+
+### Share Away YouTube Playlist
+
+https://www.youtube.com/playlist?list=PLiFooJ43_R5SK0wE1LnaBlyWw-B1Uqpwj
