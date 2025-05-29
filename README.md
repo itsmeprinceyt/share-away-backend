@@ -104,11 +104,11 @@ NEXT_PUBLIC_API_URL= # this is where your backend is hosted and running
 NEXT_PUBLIC_LOCAL_API_URL= # this is where your backend is running locally
 ```
 
-### Step 6: Start the Backend
+### Step 6: Running the Backend
 
 For Development
 ```bash
-nodemon
+nodemon 
 ```
 
 For Building
@@ -121,7 +121,7 @@ Running from production build
 npm run start
 ```
 
-### Step 7: Start the Frontend
+### Step 7: Running the Frontend
 For Development
 ```bash
 npm run dev
@@ -148,4 +148,4 @@ This version of the `README.md` provides **all possible details** about the **Sh
 
 ### Video Explaination
 
-TBA
+https://youtu.be/pBkdJ5-bF-U
